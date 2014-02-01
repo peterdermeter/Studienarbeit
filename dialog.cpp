@@ -270,7 +270,6 @@ void Dialog::calcBending()
     if (image1_gray.getROI(massCenters)) {
         if (massCenters.size() == 1) {
             image1_gray.getBending(massCenters[0], angleBefore, angleAfter, motor);
-            angleBefore = angleAfter;
             if (serial->isOpen()) {
                 QByteArray bendingValue = QByteArray("m2") + QByteArray::number(motor.bending);
                 serial->write(bendingValue);

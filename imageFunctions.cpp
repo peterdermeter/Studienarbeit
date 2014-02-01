@@ -285,6 +285,7 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
     {
         if(massCenter.y <= center.y())	//rechts oben(1)
         {
+            angleAfter.quadrant = 1;
             if (angleBefore.quadrant == 3) return;
             angleAfter.bending = angleBefore.bending - angle.bending;
             if(angleAfter.bending < -60)
@@ -299,8 +300,9 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
         }
         else							//rechts unten(4)
         {
+            angleAfter.quadrant = 4;
             angleAfter.bending = angleBefore.bending + angle.bending;
-            if(angleAfter.bending < -50)
+            if(angleAfter.bending < -60)
             {
                 angleAfter.bending = -60;
             }
@@ -315,8 +317,9 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
     {
         if(massCenter.y <= center.y())	//links oben(2)
         {
+            angleAfter.quadrant = 2;
             angleAfter.bending = angleBefore.bending - angle.bending;
-            if(angleAfter.bending < -50)
+            if(angleAfter.bending < -60)
             {
                 angleAfter.bending = -60;
             }
@@ -328,8 +331,9 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
         }
         else							//links unten(3)
         {
+            angleAfter.quadrant = 3;
             angleAfter.bending = angleBefore.bending + angle.bending;
-            if(angleAfter.bending < -50)
+            if(angleAfter.bending < -60)
             {
                 angleAfter.bending = -60;
             }
@@ -340,6 +344,7 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
             motor.bending = 5.432*angleAfter.bending + 2415;
         }
     }
+    angleBefore = angleAfter;
 }
 
 

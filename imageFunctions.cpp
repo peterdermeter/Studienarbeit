@@ -2,6 +2,33 @@
 #include <QtAlgorithms>
 
 
+
+EndoscopeData::EndoscopeData()
+    : rotation(0),
+      bending(0),
+      quadrant(0)
+{
+}
+
+EndoscopeData::EndoscopeData(const double &rot, const double &bend, const unsigned int &quadr)
+    : rotation(rot),
+      bending(bend),
+      quadrant(quadr)
+{
+}
+
+EndoscopeData::~EndoscopeData()
+{
+}
+
+QDebug& operator<<(QDebug &os, const EndoscopeData data)
+{
+    return os.nospace() << "[rot:" << data.rotation << "; bend:" << data.bending << "; quadrant:" << data.quadrant << "]";
+}
+
+
+
+
 static double square(double x) {
     return (x*x);
 }
@@ -202,7 +229,7 @@ void Matrix::getMassCenters(const std::vector<std::vector<cv::Point> > &contours
 }
 
 
-void Matrix::getRotation(const cv::Point &massCenter, const EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
+void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
 {
     if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) >= 125*cols/1920) return;
 
@@ -271,7 +298,7 @@ void Matrix::getRotation(const cv::Point &massCenter, const EndoscopeData &angle
 }
 
 
-void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
+void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
 {
     if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) >= 125*cols/1920) return;
 
@@ -345,29 +372,5 @@ void Matrix::getBending(const cv::Point &massCenter, const EndoscopeData &angleB
         }
     }
     angleBefore = angleAfter;
-}
-
-
-EndoscopeData::EndoscopeData()
-    : rotation(0),
-      bending(0),
-      quadrant(0)
-{
-}
-
-EndoscopeData::EndoscopeData(const double &rot, const double &bend, const unsigned int &quadr)
-    : rotation(rot),
-      bending(bend),
-      quadrant(quadr)
-{
-}
-
-EndoscopeData::~EndoscopeData()
-{
-}
-
-QDebug& operator<<(QDebug &os, const EndoscopeData data)
-{
-    return os.nospace() << "[rot:" << data.rotation << "; bend:" << data.bending << "; quadrant:" << data.quadrant << "]";
 }
 

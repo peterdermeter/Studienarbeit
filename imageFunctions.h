@@ -23,6 +23,7 @@ public:
     explicit EndoscopeData();
     explicit EndoscopeData(const double &rot, const double &bend, const unsigned int &quadr);
     ~EndoscopeData();
+
     friend QDebug& operator<<(QDebug& os, const EndoscopeData data);
 };
 
@@ -43,9 +44,9 @@ public:
     void removeBlackFrame();
     bool getROI(QList<cv::Point> &massCenters);
     void getMassCenters(const std::vector<std::vector<cv::Point> > &contours, QList<cv::Point> &massCenters) const;
-    void getRotation(const cv::Point &massCenter, const EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
-    void getBending(const cv::Point &massCenter, const EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
-    void getMotorData(const EndoscopeData &angle, const EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
+    void getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
+    void getBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
+    void getMotorData(const EndoscopeData &angle, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
 
 
     //! default constructor

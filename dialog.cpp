@@ -1,5 +1,6 @@
 #include "dialog.h"
 #include "ui_dialog.h"
+#include <QPainter>
 
 
 Dialog::Dialog(QWidget *parent)
@@ -71,12 +72,12 @@ void Dialog::updateFrame() {
     ////! Displaying Images on GUI  !//////////////////////////////////////////////////////////
     qimage1 = QImage((uchar*)resizeMat1.data, resizeMat1.cols, resizeMat1.rows, resizeMat1.step, QImage::Format_RGB888);
     if (massCenters.size() > 1) {
-        QPainter painter(&qimage1);
-        painter.setPen(QColor(255,0,0,200));
-        painter.setFont(QFont("Times", 20, QFont::Bold));
-        for (int i = 0; massCenters.size(); i++) {
-            painter.drawText(massCenters[0].x, massCenters[0].y, QString::number(i+1));
-        }
+//        QPainter painter(&qimage1);
+//        painter.setPen(QColor(255,0,0,200));
+//        painter.setFont(QFont("Times", 20, QFont::Bold));
+//        for (int i = 0; massCenters.size(); i++) {
+//            painter.drawText(massCenters[0].x, massCenters[0].y, QString::number(i+1));
+//        }
         //QTimer::singleShot(5000, this, SLOT(calcRotation()));
         //geht nicht so einfach -> copy von massCenter anlegen und vergleichen nach 5sec
         // -> immer noch gleich? -> calcRotation(), else return;a
@@ -190,146 +191,147 @@ void Dialog::closeApp() {
 void Dialog::openFrmGrab() {
     if(Epiphan1->Open()/* && Epiphan2->Open()*/) {
         image1 = new cv::Mat(grabSize.height(), grabSize.width(), CV_8UC3, Epiphan1->getImageData());
-//        image2 = new cv::Mat(720, 1280, CV_8UC3, Epiphan2->getImageData());
-        }
-        else {
-            QApplication::beep();
-            QMessageBox::warning(this, "Information", "Framegrabber not properly connected!");
-        }
-        return;
+        //        image2 = new cv::Mat(720, 1280, CV_8UC3, Epiphan2->getImageData());
     }
-
-    void Dialog::startOrPause() {
-        if(timer->isActive()) {
-            timer->stop();
-            Epiphan1->stopDoWork();
-            //Epiphan2->stopDoWork();
-        }
-        else if(!timer->isActive() && Epiphan1->isOpen() /*&& Epiphan2->isOpen()*/) {
-            Epiphan1->startDoWork();
-            //Epiphan2->startDoWork();
-            while(cThread1->isFinished()/* || cThread2->isFinished()*/) {}
-            timer->start();
-        }
-        return;
+    else {
+        QApplication::beep();
+        QMessageBox::warning(this, "Information", "Framegrabber not properly connected!");
     }
+    return;
+}
 
-    void Dialog::saveCurrentImage() {
-        time_t t;
-        struct tm *now;
-        std::string DateAndTime;
-        std::stringstream convert;
-        t = time(0);
-        now = localtime( & t );
-        convert     << (now->tm_year + 1900)    << '.'
-                    << (now->tm_mon + 1)        << '.'
-                    <<  now->tm_mday            << '-'
-                     <<  now->tm_hour            << '.'
-                      <<  now->tm_min             << '.'
-                       <<  now->tm_sec             << '_';
-        DateAndTime = convert.str();
-
-        cv::imwrite("C:/Users/Lenovo/Documents/Qt-Projekte/Visual_Control_FullScreen/Images/" + DateAndTime + ".bmp", *image1);
-        //cv::imwrite("C:/Users/Lenovo/Documents/Qt-Projekte/Visual_Control_FullScreen/Images/" + DateAndTime + "nose.bmp", image2);
-
-        return;
+void Dialog::startOrPause() {
+    if(timer->isActive()) {
+        timer->stop();
+        Epiphan1->stopDoWork();
+        //Epiphan2->stopDoWork();
     }
+    else if(!timer->isActive() && Epiphan1->isOpen() /*&& Epiphan2->isOpen()*/) {
+        Epiphan1->startDoWork();
+        //Epiphan2->startDoWork();
+        while(cThread1->isFinished()/* || cThread2->isFinished()*/) {}
+        timer->start();
+    }
+    return;
+}
+
+void Dialog::saveCurrentImage() {
+    time_t t;
+    struct tm *now;
+    std::string DateAndTime;
+    std::stringstream convert;
+    t = time(0);
+    now = localtime( & t );
+    convert     << (now->tm_year + 1900)    << '.'
+                << (now->tm_mon + 1)        << '.'
+                <<  now->tm_mday            << '-'
+                 <<  now->tm_hour            << '.'
+                  <<  now->tm_min             << '.'
+                   <<  now->tm_sec             << '_';
+    DateAndTime = convert.str();
+
+    cv::imwrite("C:/Users/Lenovo/Documents/Qt-Projekte/Visual_Control_FullScreen/Images/" + DateAndTime + ".bmp", *image1);
+    //cv::imwrite("C:/Users/Lenovo/Documents/Qt-Projekte/Visual_Control_FullScreen/Images/" + DateAndTime + "nose.bmp", image2);
+
+    return;
+}
 
 
-    bool Dialog::openSerialport(){
-        if (!serial->isOpen()) {
-            foreach (QSerialPortInfo info, QSerialPortInfo().availablePorts()) {
-                if (info.description() == "USB Serial Port") {
-                    serial->setPort(info);
-                    if (serial->open(QIODevice::ReadWrite)) {
-                        if (!(serial->setBaudRate(QSerialPort::Baud115200)
-                              && serial->setDataBits(QSerialPort::Data8)
-                              && serial->setParity(QSerialPort::NoParity)
-                              && serial->setStopBits(QSerialPort::OneStop)
-                              && serial->setFlowControl(QSerialPort::NoFlowControl))) {
-                            serial->close();
-                            return false;
-                        }
-                    }
-                    else {
-                        QApplication::beep();
-                        QMessageBox::warning(this, "Error Serialport", "Serialport could not be opened!");
+bool Dialog::openSerialport(){
+    if (!serial->isOpen()) {
+        foreach (QSerialPortInfo info, QSerialPortInfo().availablePorts()) {
+            if (info.description() == "USB Serial Port") {
+                serial->setPort(info);
+                if (serial->open(QIODevice::ReadWrite)) {
+                    if (!(serial->setBaudRate(QSerialPort::Baud115200)
+                          && serial->setDataBits(QSerialPort::Data8)
+                          && serial->setParity(QSerialPort::NoParity)
+                          && serial->setStopBits(QSerialPort::OneStop)
+                          && serial->setFlowControl(QSerialPort::NoFlowControl))) {
+                        serial->close();
                         return false;
                     }
-                    return true;
                 }
-            }
-            return false;
-        }
-        return true;
-    }
-
-    void Dialog::calcRotation()
-    {
-        if (automaticNavigation) {
-            cv::cvtColor(*image1, image1_gray, CV_BGR2GRAY);
-            cv::GaussianBlur(image1_gray, image1_gray, cv::Size(3,3), 0, 0);
-            image1_gray.removeBlackFrame();
-            if (image1_gray.getROI(massCenters)) {
-                image1_gray.getRotation(massCenters[0], angleBefore, angleAfter, motor);
-                if (serial->isOpen()) {
-                    QByteArray rotationValue = QByteArray("m1") + QByteArray::number(motor.rotation);
-                    serial->write(rotationValue);
+                else {
+                    QApplication::beep();
+                    QMessageBox::warning(this, "Error Serialport", "Serialport could not be opened!");
+                    return false;
                 }
-                else
-                    QMessageBox::warning(this, "Warning", "Serialport not open");
+                return true;
             }
-            QTimer::singleShot(150, this, SLOT(calcBending()));
         }
+        return false;
     }
+    return true;
+}
 
-    void Dialog::calcBending()
-    {
+void Dialog::calcRotation()
+{
+    if (automaticNavigation) {
         cv::cvtColor(*image1, image1_gray, CV_BGR2GRAY);
         cv::GaussianBlur(image1_gray, image1_gray, cv::Size(3,3), 0, 0);
         image1_gray.removeBlackFrame();
         if (image1_gray.getROI(massCenters)) {
-            if (massCenters.size() == 1) {
-                image1_gray.getBending(massCenters[0], angleBefore, angleAfter, motor);
-                if (serial->isOpen()) {
-                    QByteArray bendingValue = QByteArray("m2") + QByteArray::number(motor.bending);
-                    serial->write(bendingValue);
-                }
-                else
-                    QMessageBox::warning(this, "Warning", "Serialport not open");
+            image1_gray.getRotation(massCenters[0], angleBefore, angleAfter, motor);
+            if (serial->isOpen()) {
+                QByteArray rotationValue = QByteArray("m1") + QByteArray::number(static_cast<int>(motor.rotation));
+                serial->write(rotationValue);
             }
-            else {
-                return;
-            }
+            else
+                QMessageBox::warning(this, "Warning", "Serialport not open");
         }
-        QTimer::singleShot(150, this, SLOT(calcRotation()));
-
-        //    wenn im calcBending mehr als ein MassCenter vorhanden ist
-        //            -> kein singlshot aussenden -> autoSteuerung abgebrochen
-        //            -> stattdessen vllt im updateFrame() die MassCenters anhand von Zahlen ins qimage1 einfügen
+        QTimer::singleShot(150, this, SLOT(calcBending()));
     }
+}
 
-
-    void Dialog::readMotorData() {
-        QByteArray data = serial->readLine();
-        dataFromSerial = data.split('\t');
-        if (data.contains("off"))
-            automaticNavigation = false;
-        //qDebug() << dataFromSerial;
+void Dialog::calcBending()
+{
+    cv::cvtColor(*image1, image1_gray, CV_BGR2GRAY);
+    cv::GaussianBlur(image1_gray, image1_gray, cv::Size(3,3), 0, 0);
+    image1_gray.removeBlackFrame();
+    if (image1_gray.getROI(massCenters)) {
+        if (massCenters.size() < 10) {
+            image1_gray.getBending(massCenters[0], angleBefore, angleAfter, motor);
+            if (serial->isOpen()) {
+                QByteArray bendingValue = QByteArray("m2") + QByteArray::number(static_cast<int>(motor.bending));
+                serial->write(bendingValue);
+            }
+            else
+                QMessageBox::warning(this, "Warning", "Serialport not open");
+        }
+        else {
+            return;
+        }
     }
+    QTimer::singleShot(150, this, SLOT(calcRotation()));
+
+    //    wenn im calcBending mehr als ein MassCenter vorhanden ist
+    //            -> kein singlshot aussenden -> autoSteuerung abgebrochen
+    //            -> stattdessen vllt im updateFrame() die MassCenters anhand von Zahlen ins qimage1 einfügen
+}
 
 
-    void Dialog::initMotor() {
-        serial->write("m12700");
-        serial->write("m22470");
-        QTimer::singleShot(1000, this, SLOT(goToInitialPosition()));
+void Dialog::readMotorData() {
+    QByteArray data = serial->readLine();
+    dataFromSerial = data.split('\t');
+    if (data.contains("off"))
+        automaticNavigation = false;
+    //qDebug() << dataFromSerial;
+}
+
+
+void Dialog::initMotor() {
+    serial->write("m12700");
+    serial->write("m22470");
+    QTimer::singleShot(1000, this, SLOT(goToInitialPosition()));
+}
+
+
+void Dialog::goToInitialPosition()
+{
+    serial->write("m12810");
+    serial->write("m22384");
+    if (Epiphan1->isOpen()) {
+        QTimer::singleShot(200, this, SLOT(calcRotation()));
     }
-
-
-    void Dialog::goToInitialPosition()
-    {
-        serial->write("m12810");
-        serial->write("m22384");
-        //QTimer::singleShot(200, this, SLOT(calcRotation()));
-
-    }
+}

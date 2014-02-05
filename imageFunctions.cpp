@@ -100,16 +100,16 @@ bool Matrix::getROI(QList<cv::Point> &massCenters) {
     unsigned int elementSmall = 0;
 
     if (cols > 1500) {
-        elementBig = 31;
-        elementSmall = 12;
+        elementBig = 51;
+        elementSmall = 15;
     }
     else if (cols > 1200) {
-        elementBig = 21;
-        elementSmall = 9;
+        elementBig = 31;
+        elementSmall = 14;
     }
     else if (cols > 800) {
-        elementBig = 15;
-        elementSmall = 6;
+        elementBig = 21;
+        elementSmall = 8;
     }
     else {
         elementBig = 12;
@@ -231,7 +231,7 @@ void Matrix::getMassCenters(const std::vector<std::vector<cv::Point> > &contours
 
 void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
 {
-    if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) >= 125*cols/1920) return;
+    if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) <= 125*cols/1920) return;
 
     EndoscopeData angle;
     angle.rotation = qAtan(static_cast<double>(qAbs(massCenter.x-center.x()))/static_cast<double>(qAbs(massCenter.y-center.y()))) * 180/M_PI;                                      //Angle_Rot
@@ -300,7 +300,7 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
 
 void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
 {
-    if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) >= 125*cols/1920) return;
+    if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) <= 125*cols/1920) return;
 
     double k = 1300;   //Koeffizent für Abstand zwischen Endoskop und Nasenhöhle
     EndoscopeData angle;

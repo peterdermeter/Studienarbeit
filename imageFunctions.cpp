@@ -374,3 +374,130 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
     angleBefore = angleAfter;
 }
 
+void Matrix::getRotationAndBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const
+{
+    if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) >= 125*cols/1920) return;
+
+    EndoscopeData angle;
+    angle.rotation = qAtan(static_cast<double>(qAbs(massCenter.x-center.x()))/static_cast<double>(qAbs(massCenter.y-center.y()))) * 180/M_PI;  //Angle_Rot
+
+    // Identifikation des Quadranten, in dem sich der POI befindet
+    if(massCenter.x >= center.x())		//rechte hälfte
+    {
+        if(massCenter.y <= center.y())
+        {                                    //rechts oben (1)
+            angleAfter.quadrant = 1;
+            if (angleBefore.quadrant == 4 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation + angle.rotation/3;
+            if(angleAfter.rotation < -34) {
+                angleAfter.rotation = -34;
+            }
+            else if(angleAfter.rotation > 34) {
+                angleAfter.rotation = 34;
+            }
+            motor.rotation = -17.755*angleAfter.rotation + 2810;
+        }
+        else
+        {                                   //rechts unten (4)
+            angleAfter.quadrant = 4;
+            if (angleBefore.quadrant == 1 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation - angle.rotation/3;
+            if(angleAfter.rotation < -34) {
+                angleAfter.rotation = -34;
+            }
+            else if(angleAfter.rotation > 34) {
+                angleAfter.rotation = 34;
+            }
+            motor.rotation = -17.755*angleAfter.rotation + 2810;
+        }
+    }
+    else       //linke hälfte
+    {
+        if(massCenter.y <= center.y())
+        {                                   //links oben (2)
+            angleAfter.quadrant = 2;
+            if (angleBefore.quadrant == 3 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation - angle.rotation/3;
+            if(angleAfter.rotation < -34) {
+                angleAfter.rotation = -34;
+            }
+            else if(angleAfter.rotation > 34) {
+                angleAfter.rotation = 34;
+            }
+            motor.rotation = -17.755*angleAfter.rotation + 2810;
+        }
+        else                                //links unten (3)
+        {
+            angleAfter.quadrant = 3;
+            if (angleBefore.quadrant == 2 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation + angle.rotation/3;
+            if(angleAfter.rotation < -34) {
+                angleAfter.rotation = -34;
+            }
+            else if(angleAfter.rotation > 34) {
+                angleAfter.rotation = 34;
+            }
+            motor.rotation = -17.755*angleAfter.rotation + 2810;
+        }
+    }
+
+    int alpha = angleBefore.rotation - angleAfter.rotation;
+    double k = 900;   //Koeffizent für Abstand zwischen Endoskop und Nasenhöhle
+    double y = qAbs(qSin((alpha+90)*M_PI/180.0)*(massCenter.x-center.x()) + cos((alpha+90)*M_PI/180.0)*(center.y()-massCenter.y));
+    angle.bending = qAtan(y/k) * 180.0/M_PI;	//Substitute with calculation(absolute value)
+
+    switch (angleAfter.quadrant) {
+    case 1:
+        angleAfter.bending = angleBefore.bending - angle.bending;
+        if(angleAfter.bending < -60)
+        {
+            angleAfter.bending = -60;
+        }
+        else if(angleAfter.bending > 60)
+        {
+            angleAfter.bending = 60;
+        }
+        motor.bending = 5.75*angleAfter.bending + 2384;
+        break;
+    case 2:
+        angleAfter.bending = angleBefore.bending - angle.bending;
+        if(angleAfter.bending < -60)
+        {
+            angleAfter.bending = -60;
+        }
+        else if(angleAfter.bending > 60)
+        {
+            angleAfter.bending = 60;
+        }
+        motor.bending = 5.75*angleAfter.bending + 2384;
+        break;
+    case 3:
+        angleAfter.bending = angleBefore.bending + angle.bending;
+        if(angleAfter.bending < -60)
+        {
+            angleAfter.bending = -60;
+        }
+        else if(angleAfter.bending > 60)
+        {
+            angleAfter.bending = 60;
+        }
+        motor.bending = 5.432*angleAfter.bending + 2415;
+        break;
+    case 4:
+        angleAfter.bending = angleBefore.bending + angle.bending;
+        if(angleAfter.bending < -60)
+        {
+            angleAfter.bending = -60;
+        }
+        else if(angleAfter.bending > 60)
+        {
+            angleAfter.bending = 60;
+        }
+        motor.bending = 5.432*angleAfter.bending + 2415;
+        break;
+    default:
+        break;
+    }
+    angleBefore = angleAfter;
+}
+

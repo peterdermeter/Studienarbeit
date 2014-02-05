@@ -46,7 +46,7 @@ public:
     void getMassCenters(const std::vector<std::vector<cv::Point> > &contours, QList<cv::Point> &massCenters) const;
     void getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
     void getBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
-    void getMotorData(const EndoscopeData &angle, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
+    void getRotationAndBending(const cv::Point &massCenter, EndoscopeData &angleBefore, EndoscopeData &angleAfter, EndoscopeData &motor) const;
 
 
     //! default constructor

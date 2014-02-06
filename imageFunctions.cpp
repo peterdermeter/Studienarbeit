@@ -295,6 +295,7 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
             motor.rotation = -17.755*angleAfter.rotation + 2810;
         }
     }
+    angleBefore.rotation = angleAfter.rotation;
 }
 
 

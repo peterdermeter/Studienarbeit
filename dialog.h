@@ -44,6 +44,7 @@ private slots:
     void readMotorData();
     void goToInitialPosition();
     void initMotor();
+    void checkForKeyPressed();
 
 private:
     Ui::Dialog *ui;
@@ -58,6 +59,7 @@ private:
     ///////////////////////////////////////////////////
     ///!  ImageFunctions  !////////////////////////////
     QList<cv::Point> massCenters;
+    QList<cv::Point> massCentersBefore;
     EndoscopeData angle;
     EndoscopeData angleBefore;
     EndoscopeData angleAfter;

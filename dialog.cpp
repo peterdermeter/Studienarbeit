@@ -43,6 +43,7 @@ Dialog::Dialog(QWidget *parent)
     //timer2->stop();
     //connect(timer2, SIGNAL(timeout()), this, SLOT(processFrameAndSendData()));
     connect(timer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+    timer->setInterval(30);
     timer->stop();
 }
 
@@ -61,33 +62,37 @@ void Dialog::updateFrame() {
         QApplication::beep();
         QMessageBox::warning(this, "Warning", "USB or Videosource not connected!");
         timer->stop();
-        Epiphan1->Close();
-        //Epiphan2->Close();
+        closeApp();
         return;
     }
 
+    cv::Mat image1_copy(grabSize.height(), grabSize.width(), CV_8UC3);
+    memcpy(image1_copy.data, image1->data, grabSize.height()*grabSize.width()*3);
+    cv::circle(image1_copy, cv::Point(940,555), 150, cv::Scalar(0,0,255), 3);
+    cv::line(image1_copy, cv::Point(0,705), cv::Point(1920,705), cv::Scalar(255,0,0), 3);
+    cv::line(image1_copy, cv::Point(0,405), cv::Point(1920,405), cv::Scalar(255,0,0), 3);
     cv::Mat resizeMat1(cv::Size(this->size().width(),this->size().height()), CV_8UC3);
-    cv::resize(*image1, resizeMat1, cv::Size(this->size().width(),this->size().height()), 0, 0, CV_INTER_AREA);
+    cv::resize(image1_copy, resizeMat1, cv::Size(this->size().width(),this->size().height()), 0, 0, CV_INTER_AREA);
     ////! Displaying Images on GUI  !//////////////////////////////////////////////////////////
     qimage1 = QImage((uchar*)resizeMat1.data, resizeMat1.cols, resizeMat1.rows, resizeMat1.step, QImage::Format_RGB888);
-    if (massCenters.size() > 1) {
-        QPainter painter(&qimage1);
-        painter.setPen(QColor(255,0,0,200));
-        painter.setFont(QFont("Times", 20, QFont::Bold));
-        for (int i = 0; i < massCenters.size() && i < 3; i++) {
-            painter.drawText(massCenters[i].x*this->size().width()/image1->cols,
-                             massCenters[i].y*this->size().height()/image1->rows, QString::number(i+1));
-        }
-        massCentersBefore = massCenters;
-        QTimer::singleShot(6000, this, SLOT(checkForKeyPressed()));
-        //QTimer::singleShot(5000, this, SLOT(calcRotation()));
-        //geht nicht so einfach -> copy von massCenter anlegen und vergleichen nach 5sec
-        // -> immer noch gleich? -> calcRotation(), else return;a
+//    if (massCenters.size() > 1) {
+//        QPainter painter(&qimage1);
+//        painter.setPen(QColor(255,0,0,200));
+//        painter.setFont(QFont("Times", 20, QFont::Bold));
+//        for (int i = 0; i < massCenters.size() && i < 3; i++) {
+//            painter.drawText(massCenters[i].x*this->size().width()/image1->cols,
+//                             massCenters[i].y*this->size().height()/image1->rows, QString::number(i+1));
+//        }
+//        massCentersBefore = massCenters;
+//        QTimer::singleShot(6000, this, SLOT(checkForKeyPressed()));
+//        //QTimer::singleShot(5000, this, SLOT(calcRotation()));
+//        //geht nicht so einfach -> copy von massCenter anlegen und vergleichen nach 5sec
+//        // -> immer noch gleich? -> calcRotation(), else return;a
 
 
-        // Zahlenoverlay auf das qimage1
-        // wenn Zahl gedrückt -> härterer Sprung! -> d.h. Rot und Bend direkt hintereinander mit rotation/5 und k = k/3
-    }
+//        // Zahlenoverlay auf das qimage1
+//        // wenn Zahl gedrückt -> härterer Sprung! -> d.h. Rot und Bend direkt hintereinander mit rotation/5 und k = k/3
+//    }
     label1->setPixmap(QPixmap::fromImage(qimage1));
     //label2->setPixmap(QPixmap::fromImage(qimage2));
 }
@@ -96,7 +101,7 @@ void Dialog::updateFrame() {
 void Dialog::calcRotation()
 {
     if (automaticNavigation) {
-        cv::cvtColor(*image1, image1_gray, CV_BGR2GRAY);
+        cv::cvtColor(*image1, image1_gray, CV_RGB2GRAY);
         cv::GaussianBlur(image1_gray, image1_gray, cv::Size(3,3), 0, 0);
         image1_gray.removeBlackFrame();
         if (image1_gray.getROI(massCenters)) {
@@ -109,13 +114,13 @@ void Dialog::calcRotation()
             else
                 QMessageBox::warning(this, "Warning", "Serialport not open");
         }
-        QTimer::singleShot(150, this, SLOT(calcBending()));
+        QTimer::singleShot(120, this, SLOT(calcBending()));
     }
 }
 
 void Dialog::calcBending()
 {
-    cv::cvtColor(*image1, image1_gray, CV_BGR2GRAY);
+    cv::cvtColor(*image1, image1_gray, CV_RGB2GRAY);
     cv::GaussianBlur(image1_gray, image1_gray, cv::Size(3,3), 0, 0);
     image1_gray.removeBlackFrame();
     if (image1_gray.getROI(massCenters)) {
@@ -133,7 +138,7 @@ void Dialog::calcBending()
             return;
         }
     }
-    QTimer::singleShot(150, this, SLOT(calcRotation()));
+    QTimer::singleShot(120, this, SLOT(calcRotation()));
 
     //    wenn im calcBending mehr als ein MassCenter vorhanden ist
     //            -> kein singlshot aussenden -> autoSteuerung abgebrochen

@@ -242,8 +242,8 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
         if(massCenter.y <= center.y())
         {                                    //rechts oben (1)
             angleAfter.quadrant = 1;
-            if (angleBefore.quadrant == 4 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
-            angleAfter.rotation = angleBefore.rotation + angle.rotation/10;
+            //if (angleBefore.quadrant == 4 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation + angle.rotation/12;
             if(angleAfter.rotation < -34) {
                 angleAfter.rotation = -34;
             }
@@ -255,8 +255,8 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
         else
         {                                   //rechts unten (4)
             angleAfter.quadrant = 4;
-            if (angleBefore.quadrant == 1 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
-            angleAfter.rotation = angleBefore.rotation - angle.rotation/10;
+            //if (angleBefore.quadrant == 1 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation - angle.rotation/12;
             if(angleAfter.rotation < -34) {
                 angleAfter.rotation = -34;
             }
@@ -271,8 +271,8 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
         if(massCenter.y <= center.y())
         {                                   //links oben (2)
             angleAfter.quadrant = 2;
-            if (angleBefore.quadrant == 3 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
-            angleAfter.rotation = angleBefore.rotation - angle.rotation/10;
+            //if (angleBefore.quadrant == 3 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation - angle.rotation/12;
             if(angleAfter.rotation < -34) {
                 angleAfter.rotation = -34;
             }
@@ -284,8 +284,8 @@ void Matrix::getRotation(const cv::Point &massCenter, EndoscopeData &angleBefore
         else                                //links unten (3)
         {
             angleAfter.quadrant = 3;
-            if (angleBefore.quadrant == 2 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
-            angleAfter.rotation = angleBefore.rotation + angle.rotation/10;
+            //if (angleBefore.quadrant == 2 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
+            angleAfter.rotation = angleBefore.rotation + angle.rotation/12;
             if(angleAfter.rotation < -34) {
                 angleAfter.rotation = -34;
             }
@@ -303,7 +303,7 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
 {
     if(qSqrt(square(massCenter.x - center.x()) + square(massCenter.y - center.y())) <= 125*cols/1920) return;
 
-    double k = 1300;   //Koeffizent für Abstand zwischen Endoskop und Nasenhöhle
+    double k = 2000;   //Koeffizent für Abstand zwischen Endoskop und Nasenhöhle
     EndoscopeData angle;
     angle.bending = qAtan(static_cast<double>(qAbs(massCenter.y - center.y()))/k) * 180.0/M_PI;	//Angle_Bend
 
@@ -314,7 +314,7 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
         if(massCenter.y <= center.y())	//rechts oben(1)
         {
             angleAfter.quadrant = 1;
-            if (angleBefore.quadrant == 3) return;
+            if (angleBefore.quadrant == 4 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
             angleAfter.bending = angleBefore.bending - angle.bending;
             if(angleAfter.bending < -60)
             {
@@ -329,6 +329,7 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
         else							//rechts unten(4)
         {
             angleAfter.quadrant = 4;
+            if (angleBefore.quadrant == 1 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
             angleAfter.bending = angleBefore.bending + angle.bending;
             if(angleAfter.bending < -60)
             {
@@ -346,6 +347,7 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
         if(massCenter.y <= center.y())	//links oben(2)
         {
             angleAfter.quadrant = 2;
+            if (angleBefore.quadrant == 3 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
             angleAfter.bending = angleBefore.bending - angle.bending;
             if(angleAfter.bending < -60)
             {
@@ -360,6 +362,7 @@ void Matrix::getBending(const cv::Point &massCenter, EndoscopeData &angleBefore,
         else							//links unten(3)
         {
             angleAfter.quadrant = 3;
+            if (angleBefore.quadrant == 2 && qAbs(massCenter.y - center.y()) < 125*rows/1080) return;
             angleAfter.bending = angleBefore.bending + angle.bending;
             if(angleAfter.bending < -60)
             {
